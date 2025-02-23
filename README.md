@@ -1,50 +1,24 @@
-# React + TypeScript + Vite
+# LoopingTime
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Game engine + content for an incremental game
 
-Currently, two official plugins are available:
+## Development setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install node (on Linux `sudo apt install node`)
+2. (Optional but recommended) install pnpm `npm install -g pnpm`
+3. Clone the repository
+4. Install required packages:
+   1. Open the repository directory in the terminal
+   2. Run `pnpm install` (or `npm install`)
+5. Run the project locally
+   1. `pnpm dev` or `npm run dev`
 
-## Expanding the ESLint configuration
+## Overview
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- The game is mostly separated between the logic and visual layers
+- all the logic flows through the `gameState` object (in `src/Game/gameState.ts`)
+- Logic is coupled with display via `@preact/signals-react` for faster refresh rate. Any variable that's used for display should be a signal.
+  - Use the premade components (`NumberDisplay`, `ProgressBar`) for displaying common UI elements
+- Main game loop (in `src/Game/Loop/gameLoop.ts`) controls the ticks of all logic components
+- All the data is initialized in the collection files `src/Game/Inventory/items/items.ts`, `src/Game/Skill/skills.ts` and `src/Game/Task/tasks.ts`
+  - (subject to change, maybe it would be good to move all the collection files to a separate directory)

@@ -8,6 +8,9 @@ import { TaskQueue } from "./Task/TaskQueue/taskQueue";
 type Player = {
   name: string;
 };
+/**
+ * Main game state
+ */
 export const gameState = {
   player: {
     name: "test",
