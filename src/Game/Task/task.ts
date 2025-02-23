@@ -5,19 +5,68 @@ import type { SkillName } from "../Skill/skills";
 import { tasks, type TaskId } from "./tasks";
 
 export type TaskData = {
+  /**
+   * Task name for display
+   */
   name: string;
+  /**
+   * Task description for display
+   *
+   * unused for now
+   */
   description: string;
+  /**
+   * XP cost for the task
+   *
+   * skills give <multiplier> xp per second
+   */
   xpCost: number;
+  /**
+   * Skill that the task belongs to
+   */
   skill: SkillName;
+  /**
+   * Which task should be enabled when completing this one
+   */
   enables?: () => TaskId[];
+  /**
+   * Which task should be disabled when completing this one
+   */
   disables?: () => TaskId[];
+  /**
+   * Type of task
+   *
+   * gather tasks are repeatable by default
+   */
   type: "gather" | "craft" | "explore";
+  /**
+   * NOT IMPLEMENTED
+   *
+   * Cost of the task
+   *
+   * energy is consumed from energy pool
+   *
+   *
+   */
   cost?: {
     items?: ItemStack | ItemStack[];
     energy?: number;
   };
+  /**
+   * What should happen when the task is completed
+   *
+   * i.e. add items to inventory
+   */
   onComplete?: (state: GameState) => void;
+  /**
+   * Should this task be available multiple times
+   *
+   * Gather tasks are repeatable by default
+   */
   isRepeatable?: boolean;
+  /**
+   * Should this task be available to at the start of the loop
+   */
   available?: boolean;
 };
 

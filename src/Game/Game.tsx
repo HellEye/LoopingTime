@@ -5,7 +5,7 @@ import { startLoop } from "./Loop/gameLoop";
 import { ToggleButton } from "./Loop/ToggleButton";
 import { SkillsHeader } from "./Skill/SkillsHeader";
 import { TaskList } from "./Task/TaskQueue/TaskList";
-import { TaskQueue } from "./Task/TaskQueue/TaskQueue";
+import { TaskQueue } from "./Task/TaskQueue/TaskQueueComponent";
 import { gameState } from "./gameState";
 // import { Test } from "./Test";
 
