@@ -24,6 +24,14 @@ const InventoryItem = ({ itemStack }: { itemStack: ItemStack }) => {
       >
         +
       </button>
+      <button
+        className="px-2 py-0 border-2 border-gray-500"
+        onClick={() => {
+          gameState.inventory.removeItem(itemStack.item);
+        }}
+      >
+        –
+      </button>
     </div>
   );
 };

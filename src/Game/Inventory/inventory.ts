@@ -32,6 +32,12 @@ export class Inventory {
   removeStack(itemStack: ItemStack) {
     this.items.value = this.items.peek().filter((i) => i !== itemStack);
   }
+  removeItem(item: Item, amount: number = 1) {
+    const itemStack = this.items.peek().find((i) => i.item === item);
+    if (itemStack && itemStack.count.value >= amount) {
+      itemStack.count.value -= amount;
+    }
+  }
   tick(deltaTime: number, gameState: GameState) {
     // Reduce cooldowns and such
     this.items.peek().forEach((item) => {
