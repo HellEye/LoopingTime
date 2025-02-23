@@ -19,6 +19,7 @@ export const tasks = {
     description: "Gives one berry, yum",
     skill: "farming",
     type: "gather",
+
     xpCost: 1,
     available: true,
     onComplete: (state) => {
