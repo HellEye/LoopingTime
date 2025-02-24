@@ -1,20 +1,23 @@
 import { Skill } from "./skill";
 
-export const farming = new Skill("Farming");
+export const absorbtion = new Skill("Absorbtion");
 
-export const mining = new Skill("Mining");
+export const scanning = new Skill("Scanning");
 
 export const crafting = new Skill("Crafting");
 
 export const woodcutting = new Skill("Woodcutting");
 
+export const mining = new Skill("Mining");
+
 export const exploration = new Skill("Exploration");
 
 export const skills = {
-  farming,
-  mining,
+  absorbtion,
+  scanning,
   crafting,
   woodcutting,
+  mining,
   exploration,
 } as const;
 

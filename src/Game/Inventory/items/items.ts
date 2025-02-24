@@ -3,16 +3,16 @@ import { Item, type ItemId } from "./item";
 export const items = {
   wood1: new Item({
     id: "wood1",
-    name: "Wood",
+    name: "Oak Wood",
     icon: "wood1.png",
-    description: "A piece of wood",
+    description: "Relatively strong wood",
     type: "resource",
   }),
-  berry: new Item({
-    id: "berry",
-    name: "Berry",
-    icon: "berry1.png",
-    description: "A berry, yum",
+  smallEnergy: new Item({
+    id: "smallEnergy",
+    name: "Small Energy",
+    icon: "smallEnergy.png",
+    description: "Small energy ball",
     type: "food",
     energyValue: 5,
   }),

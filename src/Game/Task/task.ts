@@ -16,6 +16,13 @@ export type TaskData = {
    */
   description: string;
   /**
+   * Task lore
+   *
+   * unused for now
+   */
+
+  lore?: string;
+  /**
    * XP cost for the task
    *
    * skills give <multiplier> xp per second
@@ -73,6 +80,7 @@ export type TaskData = {
 export class Task {
   name: string;
   description: string;
+  lore?: string;
   xpCost: number;
   skill: SkillName;
   type: "gather" | "craft" | "explore";
@@ -88,6 +96,7 @@ export class Task {
   constructor(data: TaskData) {
     this.name = data.name;
     this.description = data.description;
+    this.lore = data.lore;
     this.xpCost = data.xpCost;
     this.skill = data.skill;
     this.onCompleteCallback = data.onComplete;
