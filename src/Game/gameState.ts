@@ -37,15 +37,33 @@ gameState.inventory.init(gameState);
 gameState.energy.init(gameState);
 gameState.gameLoop.init(gameState);
 initTasks(gameState, gameData);
-declare global {
-  interface Window {
-    gameState: GameState;
-  }
-}
+
 export const saveGame = async () => {
   await saveGameToDb(gameState, gameData);
 };
+
+export const prestigeGame = () => {
+  gameState.taskQueue.reset();
+  gameState.inventory.reset();
+  gameState.energy.prestige(gameState);
+  Object.values(gameData.tasks).forEach((task) => {
+    task.available.value = task.initialAvailable;
+  });
+  Object.values(gameData.skills).forEach((skill) => {
+    skill.prestige();
+  });
+  gameState.gameLoop.onRestart();
+};
+
+declare global {
+  interface Window {
+    gameState: GameState;
+    gameData: GameData;
+    debug: Record<string, () => void>;
+  }
+}
 window.gameState = gameState;
+window.gameData = gameData;
 
 if (!gameStateLoaded) {
   loadGameFromDb(gameState, gameData);

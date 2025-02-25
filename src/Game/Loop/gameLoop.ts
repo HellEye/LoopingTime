@@ -11,6 +11,7 @@ const processTick = (deltaTime: number) => {
   gameState.taskQueue.tick(deltaTime, gameState, gameData);
   gameState.inventory.tick(deltaTime, gameState);
   gameState.energy.tick(deltaTime);
+  gameState.gameLoop.tick(gameState, deltaTime);
 };
 
 const SAVE_INTERVAL = 15000; // 15 seconds

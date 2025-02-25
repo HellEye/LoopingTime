@@ -1,6 +1,7 @@
 import { tasks, type TaskId } from "../Data/tasks";
 import type { GameData, GameState } from "../gameState";
 import { loadEnergy, saveEnergy } from "./saveEnergy";
+import { loadGameLoop, saveGameLoop } from "./saveGameLoop";
 import { loadInventory, saveInventory } from "./saveInventory";
 import { loadSkills, saveAllSkills } from "./saveSkill";
 import { loadTaskQueue, saveTaskQueue } from "./saveTaskQueue";
@@ -17,6 +18,7 @@ export const saveGameToDb = async (
     saveInventory(gameState.inventory),
     saveTasks(Object.values(tasks).filter((task) => task.available.peek())),
     saveTaskQueue(gameState.taskQueue.toData()),
+    saveGameLoop(gameState.gameLoop),
   ]);
   console.timeEnd("saveGame");
 };
@@ -25,13 +27,15 @@ export const loadGameFromDb = async (
   gameData: GameData
 ) => {
   console.time("loadGame");
-  const [skills, energy, inventory, dbTasks, taskQueue] = await Promise.all([
-    loadSkills(),
-    loadEnergy(),
-    loadInventory(),
-    loadTasks(),
-    loadTaskQueue(),
-  ]);
+  const [skills, energy, inventory, dbTasks, taskQueue, gameLoop] =
+    await Promise.all([
+      loadSkills(),
+      loadEnergy(),
+      loadInventory(),
+      loadTasks(),
+      loadTaskQueue(),
+      loadGameLoop(),
+    ]);
   skills.forEach(([id, skill]) => {
     if (gameData.skills[id as keyof typeof gameData.skills]) {
       gameData.skills[id as keyof typeof gameData.skills].fromData(skill);
@@ -51,6 +55,9 @@ export const loadGameFromDb = async (
   }
   if (taskQueue) {
     gameState.taskQueue.fromData(taskQueue);
+  }
+  if (gameLoop) {
+    gameState.gameLoop.fromData(gameLoop.data);
   }
   console.timeEnd("loadGame");
 };

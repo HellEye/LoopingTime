@@ -1,5 +1,6 @@
 import { NumberDisplay } from "../../../Components/Number";
 import { ProgressBar } from "../../../Components/ProgressBar";
+import { Time } from "../../../Components/Time";
 import { gameState } from "../../gameState";
 
 export const EnergyMainBar = () => {
@@ -12,8 +13,14 @@ export const EnergyMainBar = () => {
       label={
         <div className="flex flex-row gap-4 w-full h-full items-center justify-center font-bold text-lg">
           <div>
+            <Time value={gameState.gameLoop.loopTime} />
+          </div>
+          <div>
             Energy: <NumberDisplay value={gameState.energy.energy} /> /{" "}
             <NumberDisplay value={gameState.energy.energyMax} />
+          </div>
+          <div className="text-gray-400">
+            +({gameState.energy.totalEnergyIncreaseAfterLoop})
           </div>
           <div>
             Decay: <NumberDisplay value={gameState.energy.totalDecay} />

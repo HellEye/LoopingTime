@@ -117,6 +117,7 @@ export class Task<TKey extends string = string> {
   type: "gather" | "craft" | "explore";
   onCompleteCallback?: (state: GameState) => void;
   available: Signal<boolean>;
+  initialAvailable: boolean;
   isRepeatable: boolean;
   enables?: Task[];
   disables?: Task[];
@@ -142,6 +143,7 @@ export class Task<TKey extends string = string> {
     this.lore = data.lore;
     this.xpCost = data.xpCost;
     this.skill = data.skill;
+    this.initialAvailable = data.available ?? false;
     this.onCompleteCallback = data.onComplete;
     this.enablesFunc = data.enables;
     this.disablesFunc = data.disables;
