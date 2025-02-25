@@ -1,11 +1,5 @@
 import { type GameData, type GameState } from "../gameState";
-import {
-  CraftingTask,
-  Task,
-  type AnyTaskData,
-  type CraftTaskData,
-  type TaskData,
-} from "../Task/task";
+import { Task, type AnyTaskData, type TaskData } from "../Task/task";
 
 function defineTasks<const Keys extends string>(
   tasks: Record<Keys, AnyTaskData<Keys>>
@@ -13,10 +7,7 @@ function defineTasks<const Keys extends string>(
   return Object.fromEntries(
     Object.entries(tasks).map(([key, v]) => {
       const value = v as AnyTaskData<Keys>;
-      const task =
-        value.type === "craft"
-          ? new CraftingTask<Keys>(value as CraftTaskData<Keys>)
-          : new Task<Keys>(value as TaskData<Keys>);
+      const task = new Task<Keys>(value as TaskData<Keys>);
       return [key as Keys, task] as const;
     })
   ) as { [K in Keys]: Task<Keys> };

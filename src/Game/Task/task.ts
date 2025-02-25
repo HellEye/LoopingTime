@@ -50,7 +50,7 @@ export type TaskData<TKey extends string = string> = {
    * gather tasks are repeatable by default
    *
    */
-  type: "gather" | "explore";
+  type: "gather" | "explore" | "craft";
 
   /**
    * What should happen when the task is completed
@@ -68,21 +68,14 @@ export type TaskData<TKey extends string = string> = {
    * Should this task be available to at the start of the loop
    */
   available?: boolean;
-};
-export type Items = { item: ItemId; amount: number };
-export type CraftTaskData<TKey extends string = string> = Omit<
-  TaskData<TKey>,
-  "type"
-> & {
-  type: "craft";
   /**
    * Items required to craft
    */
-  cost: Items[];
+  cost?: Items[];
 };
-export type AnyTaskData<TKey extends string = string> =
-  | TaskData<TKey>
-  | CraftTaskData<TKey>;
+export type Items = { item: ItemId; amount: number };
+
+export type AnyTaskData<TKey extends string = string> = TaskData<TKey>;
 
 export type TaskSaveData = {
   id: string;
@@ -130,6 +123,16 @@ export class Task<TKey extends string = string> {
   gives?: Items[];
   progress: Signal<TaskProgress>;
 
+  // for crafting
+  cost?: Signal<
+    Array<
+      Items & {
+        used: Signal<number>;
+        useXpStep: number;
+      }
+    >
+  >;
+
   // Temporary function references necessary for defining task relations
   enablesFunc?: () => NoInfer<TKey>[];
   disablesFunc?: () => NoInfer<TKey>[];
@@ -142,6 +145,16 @@ export class Task<TKey extends string = string> {
     this.onCompleteCallback = data.onComplete;
     this.enablesFunc = data.enables;
     this.disablesFunc = data.disables;
+    if (data.cost) {
+      this.cost = signal(
+        data.cost.map((itemCost) => ({
+          ...itemCost,
+          used: signal(0),
+          useXpStep: this.xpCost / itemCost.amount,
+        }))
+      );
+    }
+
     this.gives = data.gives;
     this.progress = signal(new TaskProgress(this, 0));
     this.type = data.type;
@@ -159,7 +172,33 @@ export class Task<TKey extends string = string> {
     gameState: GameState,
     gameData: GameData
   ): TaskTickResult {
+    // tick progress
     this.progress.value.tick(deltaTime, gameState, gameData);
+    // check and subtract resources first
+    if (this.cost) {
+      const craftingRes = this.#tickCrafting(gameState, gameData);
+      if (craftingRes) return craftingRes;
+    }
+    return undefined;
+  }
+
+  #tickCrafting(gameState: GameState, gameData: GameData): TaskTickResult {
+    if (!this.cost) return undefined;
+    for (const itemCost of this.cost.peek()) {
+      // while loop just to avoid overflows, usually it'll only run once, like an if statement
+      while (
+        this.progress.peek().currentXp.peek() >=
+        itemCost.useXpStep * itemCost.used.peek()
+      ) {
+        const item = gameData.items[itemCost.item];
+        if (gameState.inventory.hasItem(item)) {
+          gameState.inventory.removeItem(item);
+          itemCost.used.value++;
+        } else {
+          return { type: "notEnoughResources", itemId: itemCost.item };
+        }
+      }
+    }
     return undefined;
   }
   init(gameState: GameState, gameData: GameData) {
@@ -202,97 +241,34 @@ export class Task<TKey extends string = string> {
         state.inventory.addItem(gameData.items[item.item], item.amount);
       });
     }
+    if (this.cost) {
+      for (const itemCost of this.cost.peek()) {
+        itemCost.used.value = 0;
+      }
+    }
     if (this.onCompleteCallback) {
       this.onCompleteCallback(state);
     }
   }
   toData(): TaskSaveData {
-    return this.progress.value.toData();
+    return {
+      ...this.progress.value.toData(),
+      cost: this.cost?.peek().map((itemCost) => ({
+        item: itemCost.item,
+        used: itemCost.used.peek(),
+      })),
+    };
   }
   fromData(data: TaskSaveData) {
     this.progress.value.currentXp.value = data.progress;
-    this.available.value = true;
-  }
-}
-
-export class CraftingTask<TKey extends string = string> extends Task<TKey> {
-  type = "craft" as const;
-  cost: Signal<
-    Array<
-      Items & {
-        used: Signal<number>;
-        useXpStep: number;
-      }
-    >
-  >;
-
-  constructor(data: CraftTaskData<TKey>) {
-    super({ ...data, type: "craft" });
-    this.cost = signal(
-      data.cost.map((itemCost) => ({
-        ...itemCost,
-        used: signal(0),
-        useXpStep: this.xpCost / itemCost.amount,
-      }))
-    );
-  }
-
-  init(gameState: GameState, gameData: GameData) {
-    super.init(gameState, gameData);
-  }
-  tick(
-    deltaTime: number,
-    gameState: GameState,
-    gameData: GameData
-  ): TaskTickResult {
-    const superRes = super.tick(deltaTime, gameState, gameData);
-    console.log("tick craft", this.cost.peek());
-    // check and subtract resources first
-    for (const itemCost of this.cost.peek()) {
-      // while loop just to avoid overflows, usually it'll only run once, like an if statement
-      while (
-        this.progress.peek().currentXp.peek() >=
-        itemCost.useXpStep * itemCost.used.peek()
-      ) {
-        const item = gameData.items[itemCost.item];
-        if (gameState.inventory.hasItem(item)) {
-          console.log("remove item: ", itemCost.item);
-          gameState.inventory.removeItem(item);
-          itemCost.used.value++;
-        } else {
-          console.log("not enough resource: ", itemCost.item);
-          return { type: "notEnoughResources", itemId: itemCost.item };
-        }
-      }
-    }
-    if (superRes) return superRes;
-    return undefined;
-  }
-  onComplete(state: GameState, gameData: GameData): void {
-    super.onComplete(state, gameData);
-    for (const itemCost of this.cost.peek()) {
-      itemCost.used.value = 0;
-    }
-  }
-
-  toData(): TaskSaveData {
-    const base = this.progress.value.toData();
-    base.cost = this.cost.peek().map((itemCost) => ({
-      item: itemCost.item,
-      used: itemCost.used.peek(),
-    }));
-    return base;
-  }
-  fromData(data: TaskSaveData) {
-    this.progress.value.currentXp.value = data.progress;
-    this.available.value = true;
     data.cost?.forEach((itemCost) => {
       const currentCost = this.cost
-        .peek()
+        ?.peek()
         .find((c) => c.item === itemCost.item);
       if (currentCost) {
         currentCost.used.value = itemCost.used;
       }
     });
+    this.available.value = true;
   }
 }
