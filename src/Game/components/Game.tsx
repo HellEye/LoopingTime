@@ -7,6 +7,7 @@ import { SkillsHeader } from "./Skill/SkillsHeader";
 import { TaskList } from "./Task/TaskList";
 import { TaskQueue } from "./Task/TaskQueue";
 import { gameState } from "../gameState";
+import DeathScreen from "./DeathScreen";
 // import { Test } from "./Test";
 
 const Game = () => {
@@ -16,23 +17,25 @@ const Game = () => {
     }
   });
   return (
-    <div className="flex flex-col gap-4">
-      <EnergyMainBar />
-      <SkillsHeader />
-      <div>Game</div>
-      <div className="flex flex-row gap-12">
-        <TaskList />
-        <InventoryPanel />
-        <TaskQueue />
+    <DeathScreen>
+      <div className="flex flex-col gap-4">
+        <EnergyMainBar />
+        <SkillsHeader />
+        <div>Game</div>
+        <div className="flex flex-row gap-12">
+          <TaskList />
+          <InventoryPanel />
+          <TaskQueue />
+        </div>
+        <ToggleButton
+          pauseComponent={
+            <div className="bg-green-800 p-2 rounded-md">Pause</div>
+          }
+          playComponent={<div className="bg-red-800 p-2 rounded-md">Play</div>}
+        />
+        {/* <Test /> */}
       </div>
-      <ToggleButton
-        pauseComponent={
-          <div className="bg-green-800 p-2 rounded-md">Pause</div>
-        }
-        playComponent={<div className="bg-red-800 p-2 rounded-md">Play</div>}
-      />
-      {/* <Test /> */}
-    </div>
+    </DeathScreen>
   );
 };
 

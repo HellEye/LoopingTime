@@ -1,5 +1,5 @@
 import { effect, signal, type Signal } from "@preact/signals-react";
-import type { GameState } from "../gameState";
+import { gameState, type GameState } from "../gameState";
 export type GameLoopData = {
   loopTime: number;
   alive: boolean;
@@ -29,6 +29,7 @@ export class GameLoop {
   }
   onRestart() {
     this.alive.value = true;
+    this.loopTime.value = 0;
   }
   tick(_gameState: GameState, deltaTime: number) {
     this.loopTime.value += deltaTime;
