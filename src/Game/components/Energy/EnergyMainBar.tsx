@@ -1,6 +1,6 @@
-import { NumberDisplay } from "../../Components/Number";
-import { ProgressBar } from "../../Components/ProgressBar";
-import { gameState } from "../gameState";
+import { NumberDisplay } from "../../../Components/Number";
+import { ProgressBar } from "../../../Components/ProgressBar";
+import { gameState } from "../../gameState";
 
 export const EnergyMainBar = () => {
   return (

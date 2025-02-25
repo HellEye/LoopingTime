@@ -1,4 +1,4 @@
-import { gameState } from "../gameState";
+import { gameState } from "../../gameState";
 
 type Props = {
   pauseComponent: React.ReactNode;

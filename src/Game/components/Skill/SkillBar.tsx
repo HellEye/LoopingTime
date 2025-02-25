@@ -1,5 +1,5 @@
-import { ProgressBar } from "../../Components/ProgressBar";
-import type { Skill } from "./skill";
+import { ProgressBar } from "../../../Components/ProgressBar";
+import type { Skill } from "../../Skill/skill";
 
 type Props = {
   type: "prestige" | "normal";

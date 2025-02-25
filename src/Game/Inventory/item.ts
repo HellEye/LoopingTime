@@ -4,11 +4,11 @@ import {
   type ReadonlySignal,
   type Signal,
 } from "@preact/signals-react";
-import { gameState, type GameState } from "../../gameState";
+import { gameState, type GameState } from "../gameState";
+import { itemToIdMap } from "../Data/items";
 export type ItemId = string & { __type?: "itemId" };
 
 export type ItemData = {
-  readonly id: ItemId;
   readonly name: string;
   readonly icon: string;
   readonly description: string;
@@ -28,7 +28,6 @@ export type ItemData = {
 );
 
 export class Item {
-  readonly id: ItemId;
   readonly name: string;
   readonly icon: string;
   readonly description: string;
@@ -37,7 +36,6 @@ export class Item {
   canConsume: ReadonlySignal<boolean>;
   // TODO gamestate reference
   constructor(data: ItemData) {
-    this.id = data.id;
     this.name = data.name;
     this.icon = data.icon;
     this.description = data.description;
@@ -58,15 +56,21 @@ export class Item {
   }
   init() {}
 }
+
+export type ItemStackData = {
+  itemId: string;
+  count: number;
+  cooldown: number;
+};
 export class ItemStack {
   item: Item;
   count: Signal<number>;
   cooldown: Signal<number>;
   canConsume: ReadonlySignal<boolean>;
-  constructor(item: Item, amount: number = 0) {
+  constructor(item: Item, amount: number = 0, currentCooldown: number = 0) {
     this.item = item;
     this.count = signal(amount);
-    this.cooldown = signal(0);
+    this.cooldown = signal(currentCooldown);
     this.canConsume = computed(
       () => this.item.canConsume.value && this.cooldown.value <= 0
     );
@@ -95,5 +99,12 @@ export class ItemStack {
     if (this.count.peek() <= 0 && this.cooldown.peek() <= 0) {
       gameState.inventory.removeStack(this);
     }
+  }
+  toData(): ItemStackData {
+    return {
+      itemId: itemToIdMap.get(this.item)!,
+      count: this.count.value,
+      cooldown: this.cooldown.value,
+    };
   }
 }

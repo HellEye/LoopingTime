@@ -1,8 +1,25 @@
-import { gameState } from "../gameState";
-import { Task } from "./task";
+import { type GameState } from "../gameState";
+import { Task, type TaskData } from "../Task/task";
 
-export const tasks = {
-  gatherWood: new Task({
+// type CustomTaskData<T> = Omit<TaskData, "enables" | "disables"> & {
+//   enables?: () => NoInfer<T>[];
+//   disables?: () => NoInfer<T>[];
+// };
+
+function defineTasks<const Keys extends string>(
+  tasks: Record<Keys, TaskData<Keys>>
+): Record<Keys, Task<Keys>> {
+  return Object.fromEntries(
+    Object.entries(tasks).map(
+      ([key, value]) =>
+        [key as Keys, new Task<Keys>(value as TaskData<Keys>)] as const
+    )
+  ) as { [K in Keys]: Task<Keys> };
+}
+
+export type TaskId = keyof typeof tasks;
+export const tasks = defineTasks({
+  gatherWood: {
     name: "Gather Oak Wood",
     description: "Extract one wood",
     skill: "woodcutting",
@@ -12,8 +29,8 @@ export const tasks = {
     onComplete: (state) => {
       state.inventory.addItem(state.items.wood1);
     },
-  }),
-  gatherSmallEnergy: new Task({
+  },
+  gatherSmallEnergy: {
     name: "Gather Small Energy",
     description: "Change energy to SYSTEM compatible. High potential.",
     skill: "absorbtion",
@@ -24,8 +41,8 @@ export const tasks = {
     onComplete: (state) => {
       state.inventory.addItem(state.items.smallEnergy);
     },
-  }),
-  craftWoodenStick: new Task({
+  },
+  craftWoodenStick: {
     name: "Craft Wooden Stick",
     description: "Gives one wooden stick",
     skill: "crafting",
@@ -34,7 +51,7 @@ export const tasks = {
     onComplete: (_state) => {
       // state.inventory.addItem("wooden-stick");
     },
-  }),
+  },
   /* beggining quote
   |Awakening protocoll initialized|
 
@@ -45,7 +62,7 @@ export const tasks = {
 
           Main task: grow, learn
   */
-  exitCapsule: new Task({
+  exitCapsule: {
     name: "Exit capsule",
     description: "Exit evacuation capsule",
     lore: `Landing area burnt some local unknown flora
@@ -57,9 +74,9 @@ export const tasks = {
     xpCost: 30,
     enables: () => ["scanBurntFlora", "scanGrass", "scanTrees", "scanRocks"],
     disables: () => ["exitCapsule"],
-  }),
+  },
 
-  scanBurntFlora: new Task({
+  scanBurntFlora: {
     name: "Scan burnt flora",
     description: `Fire changed flora
     Scan to learn`,
@@ -68,22 +85,22 @@ export const tasks = {
     skill: "scanning",
     type: "explore",
     xpCost: 5,
-    disables: () => ["scanBurntFLora"],
+    disables: () => ["scanBurntFlora"],
     //one timer
-  }),
-  scanGrass: new Task({
+  },
+  scanGrass: {
     name: "Scan grass",
     description: `Grass indicates surroundings state
     Scan to learn`,
     lore: `Terrain stable
-    Thesis: Some small and tiny animals exist`,
+    Observation: Some small and tiny animals exist`,
     skill: "scanning",
     type: "explore",
     xpCost: 30,
     disables: () => ["scanGrass"],
     //one timer
-  }),
-  scanTrees: new Task({
+  },
+  scanTrees: {
     name: "Scan trees",
     description: `Types of trees vary
     Scan to identify`,
@@ -93,10 +110,10 @@ export const tasks = {
     xpCost: 20,
     enables: () => ["gatherWood"],
     disables: () => ["scanTrees"],
-  }),
-  scanRocks: new Task({
+  },
+  scanRocks: {
     name: "Scan rocks",
-    description: `Thesis: Decomposed flora with rocks creates unique minerals
+    description: `Observation: Decomposed flora with rocks creates unique minerals
     Hypothesis: Rocks indicate whether minerals are nearby`,
     lore: `Very few minerals detected
     Probable directions broadened`,
@@ -105,17 +122,18 @@ export const tasks = {
     xpCost: 24,
     enables: () => ["exploreNorthPlains", "exploreNorthEastPlains"],
     disables: () => ["scanRocks"],
-  }),
-  exploreNorthPlains: new Task({
+  },
+  exploreNorthPlains: {
     name: "Explore north plains",
     description: "",
     skill: "exploration",
+
     type: "explore",
     xpCost: 50,
-    //enables: () => ["othertaskName"],
+    // enables: () => ["othertaskName"],
     disables: () => ["exploreNorthEastPlains", "scanBurntFlora"],
-  }),
-  exploreNorthEastPlains: new Task({
+  },
+  exploreNorthEastPlains: {
     name: "Explore north east plains",
     description: "",
     skill: "exploration",
@@ -123,9 +141,8 @@ export const tasks = {
     xpCost: 35,
     //enables: () => ["othertaskName"],
     disables: () => ["exploreNorthPlains", "scanBurntFlora"],
-  }),
-
-  gatherStone: new Task({
+  },
+  gatherStone: {
     name: "Gather Stone",
     description: "Gives one stone",
     skill: "mining",
@@ -134,7 +151,12 @@ export const tasks = {
     onComplete: (_state) => {
       // state.inventory.addItem(items.stone);
     },
-  }),
-} as const;
-Object.values(tasks).forEach((task) => task.init(gameState));
-export type TaskId = keyof typeof tasks;
+  },
+});
+export const initTasks = (gameState: GameState) => {
+  Object.values(tasks).forEach((task) => task.init(gameState));
+};
+
+export const taskToIdMap = new Map<Task, TaskId>(
+  Object.entries(tasks).map(([taskId, task]) => [task, taskId as TaskId])
+);

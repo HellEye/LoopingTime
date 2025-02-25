@@ -4,14 +4,19 @@ import {
   type ReadonlySignal,
   type Signal,
 } from "@preact/signals-react";
-import { ItemStack, type Item } from "./items/item";
+import { ItemStack, type Item, type ItemStackData } from "./item";
 import type { GameState } from "../gameState";
-
+import { items } from "../Data/items";
+export type InventoryData = {
+  capacity: number;
+  items: Array<ItemStackData>;
+  foodCooldown: number;
+};
 export class Inventory {
   capacity: Signal<number>;
   remainingCapacity: ReadonlySignal<number>;
   items: Signal<ItemStack[]>;
-  count: Signal<number>;
+  count: ReadonlySignal<number>;
   foodCooldown: Signal<number>;
   constructor() {
     this.capacity = signal(10);
@@ -64,7 +69,29 @@ export class Inventory {
       this.items.value = [...this.items.value, new ItemStack(item, amount)];
     }
   }
+  toData(): InventoryData {
+    return {
+      capacity: this.capacity.peek(),
+      items: this.items.peek().map((item) => item.toData()),
+      foodCooldown: this.foodCooldown.peek(),
+    };
+  }
+  fromData(data: InventoryData) {
+    this.capacity.value = data.capacity;
+    this.items.value = data.items.map(
+      (item) =>
+        new ItemStack(
+          items[item.itemId as keyof typeof items],
+          item.count,
+          item.cooldown
+        )
+    );
+    this.foodCooldown.value = data.foodCooldown;
+  }
+
   reset() {
     this.items.value = [];
+    this.capacity.value = 10;
+    this.foodCooldown.value = 5;
   }
 }

@@ -1,8 +1,8 @@
 import { computed } from "@preact/signals-react";
 import { ProgressBar } from "../../../Components/ProgressBar";
 import { gameState } from "../../gameState";
-import type { Task } from "../task";
-import { tasks } from "../tasks";
+import type { Task } from "../../Task/task";
+import { tasks } from "../../Data/tasks";
 import Box from "../../../Components/Box";
 
 const availableTasks = computed<Task[]>(() => {
@@ -29,7 +29,7 @@ const TaskItem = ({ task }: { task: Task }) => {
       <ProgressBar
         barClassName="h-2"
         backgroundClassName="bg-gray-800"
-        value={task.progress}
+        value={task.progress.value.progress}
         maxValue={task.xpCost}
         fillClassName="bg-green-500"
       />

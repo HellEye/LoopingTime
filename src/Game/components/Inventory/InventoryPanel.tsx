@@ -1,7 +1,7 @@
-import Box from "../../Components/Box";
-import { NumberDisplay } from "../../Components/Number";
-import { gameState } from "../gameState";
-import type { ItemStack } from "./items/item";
+import Box from "../../../Components/Box";
+import { NumberDisplay } from "../../../Components/Number";
+import { gameState } from "../../gameState";
+import type { ItemStack } from "../../Inventory/item";
 /**
  * Individual item display component
  */

@@ -1,10 +1,10 @@
 import { effect, signal, type Signal } from "@preact/signals-react";
+import type { SkillName } from "../Data/skills";
+import { tasks, taskToIdMap } from "../Data/tasks";
 import type { GameState } from "../gameState";
-import type { ItemStack } from "../Inventory/items/item";
-import type { SkillName } from "../Skill/skills";
-import { tasks, type TaskId } from "./tasks";
+import type { ItemStack } from "../Inventory/item";
 
-export type TaskData = {
+export type TaskData<TKey extends string = string> = {
   /**
    * Task name for display
    */
@@ -35,11 +35,11 @@ export type TaskData = {
   /**
    * Which task should be enabled when completing this one
    */
-  enables?: () => TaskId[];
+  enables?: () => NoInfer<TKey>[];
   /**
    * Which task should be disabled when completing this one
    */
-  disables?: () => TaskId[];
+  disables?: () => NoInfer<TKey>[];
   /**
    * Type of task
    *
@@ -77,7 +77,30 @@ export type TaskData = {
   available?: boolean;
 };
 
-export class Task {
+export type TaskSaveData = {
+  id: string;
+  progress: number;
+};
+
+export class TaskProgress {
+  task: Task;
+  progress: Signal<number>;
+  constructor(task: Task, progress: number) {
+    this.task = task;
+    this.progress = signal(progress);
+  }
+  increaseProgress(amount: number) {
+    this.progress.value += amount;
+  }
+  toData(): TaskSaveData {
+    return {
+      id: taskToIdMap.get(this.task)!,
+      progress: this.progress.peek(),
+    };
+  }
+}
+
+export class Task<TKey extends string = string> {
   name: string;
   description: string;
   lore?: string;
@@ -89,11 +112,11 @@ export class Task {
   isRepeatable: boolean;
   enables?: Task[];
   disables?: Task[];
-  progress: Signal<number>;
+  progress: Signal<TaskProgress>;
   // Temporary function references necessary for defining task relations
-  enablesFunc?: () => TaskId[];
-  disablesFunc?: () => TaskId[];
-  constructor(data: TaskData) {
+  enablesFunc?: () => NoInfer<TKey>[];
+  disablesFunc?: () => NoInfer<TKey>[];
+  constructor(data: TaskData<TKey>) {
     this.name = data.name;
     this.description = data.description;
     this.lore = data.lore;
@@ -102,7 +125,7 @@ export class Task {
     this.onCompleteCallback = data.onComplete;
     this.enablesFunc = data.enables;
     this.disablesFunc = data.disables;
-    this.progress = signal(0);
+    this.progress = signal(new TaskProgress(this, 0));
     this.type = data.type;
     this.available = signal(data.available ?? false);
     if (data.type === "gather") {
@@ -114,12 +137,16 @@ export class Task {
     // effects
   }
   init(gameState: GameState) {
-    this.enables = this.enablesFunc?.().map((id) => tasks[id]);
-    this.disables = this.disablesFunc?.().map((id) => tasks[id]);
+    this.enables = this.enablesFunc?.().map(
+      (id) => tasks[id as TKey & keyof typeof tasks]
+    );
+    this.disables = this.disablesFunc?.().map(
+      (id) => tasks[id as TKey & keyof typeof tasks]
+    );
     effect(() => {
-      if (this.progress.value >= this.xpCost) {
+      if (this.progress.value.progress.value >= this.xpCost) {
         this.onComplete?.(gameState);
-        this.progress.value = 0;
+        this.progress.value.progress.value = 0;
       }
     });
     // Delete the function references to clean up memory
@@ -147,5 +174,12 @@ export class Task {
     if (this.onCompleteCallback) {
       this.onCompleteCallback(state);
     }
+  }
+  toData(): TaskSaveData {
+    return this.progress.value.toData();
+  }
+  fromData(progress: number) {
+    this.progress.value.progress.value = progress;
+    this.available.value = true;
   }
 }

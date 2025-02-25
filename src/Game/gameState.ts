@@ -1,8 +1,10 @@
+import { items } from "./Data/items";
+import { skills } from "./Data/skills";
+import { initTasks } from "./Data/tasks";
 import { Energy } from "./Energy/energy";
 import { Inventory } from "./Inventory/inventory";
-import { items } from "./Inventory/items/items";
 import { GameLoop } from "./Loop/gameLoopData";
-import { skills } from "./Skill/skills";
+import { loadGameFromDb, saveGameToDb } from "./Saves/SaveManager";
 import { TaskQueue } from "./Task/TaskQueue/taskQueue";
 
 type Player = {
@@ -23,16 +25,23 @@ export const gameState = {
   taskQueue: new TaskQueue(),
 } as const;
 export type GameState = typeof gameState;
-
+let gameStateLoaded = false;
 gameState.taskQueue.init(gameState);
 gameState.inventory.init(gameState);
 gameState.energy.init(gameState);
 gameState.gameLoop.init(gameState);
-
+initTasks(gameState);
 declare global {
   interface Window {
     gameState: GameState;
   }
 }
-
+export const saveGame = async () => {
+  await saveGameToDb(gameState);
+};
 window.gameState = gameState;
+
+if (!gameStateLoaded) {
+  loadGameFromDb(gameState);
+  gameStateLoaded = true;
+}

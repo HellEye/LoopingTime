@@ -1,4 +1,4 @@
-import { gameState } from "../gameState";
+import { gameState, saveGame } from "../gameState";
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const TARGET_FPS = 60;
@@ -13,7 +13,10 @@ const processTick = (deltaTime: number) => {
   gameState.energy.tick(deltaTime);
 };
 
+const SAVE_INTERVAL = 15000; // 15 seconds
+
 let frameStart = 0;
+let saveIntervalStart = 0;
 
 /**
  * "Engine" loop that keeps constant time between frames
@@ -23,7 +26,10 @@ export const tick = async () => {
     frameStart === -1 ? TARGET_FRAME_TIME : performance.now() - frameStart;
   frameStart = performance.now();
   processTick(deltaTime / 1000);
-
+  if (performance.now() - saveIntervalStart > SAVE_INTERVAL) {
+    saveGame();
+    saveIntervalStart = performance.now();
+  }
   if (performance.now() - frameStart < TARGET_FRAME_TIME) {
     await wait(TARGET_FRAME_TIME - (performance.now() - frameStart));
   }

@@ -1,7 +1,7 @@
-import Box from "../../Components/Box";
-import { NumberDisplay } from "../../Components/Number";
-import { gameState } from "../gameState";
-import type { Skill } from "./skill";
+import Box from "../../../Components/Box";
+import { NumberDisplay } from "../../../Components/Number";
+import { gameState } from "../../gameState";
+import type { Skill } from "../../Skill/skill";
 import { SkillBar } from "./SkillBar";
 const SkillField = ({ skill }: { skill: Skill }) => {
   return (

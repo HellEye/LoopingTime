@@ -1,12 +1,12 @@
 import { useSignalEffect } from "@preact/signals-react";
 import { EnergyMainBar } from "./Energy/EnergyMainBar";
 import { InventoryPanel } from "./Inventory/InventoryPanel";
-import { startLoop } from "./Loop/gameLoop";
-import { ToggleButton } from "./Loop/ToggleButton";
+import { startLoop } from "../Loop/gameLoop";
+import { ToggleButton } from "./GameLoop/ToggleButton";
 import { SkillsHeader } from "./Skill/SkillsHeader";
-import { TaskList } from "./Task/TaskQueue/TaskList";
-import { TaskQueue } from "./Task/TaskQueue/TaskQueueComponent";
-import { gameState } from "./gameState";
+import { TaskList } from "./Task/TaskList";
+import { TaskQueue } from "./Task/TaskQueue";
+import { gameState } from "../gameState";
 // import { Test } from "./Test";
 
 const Game = () => {

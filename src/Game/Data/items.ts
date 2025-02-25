@@ -1,15 +1,13 @@
-import { Item, type ItemId } from "./item";
+import { Item, type ItemId } from "../Inventory/item";
 
 export const items = {
   wood1: new Item({
-    id: "wood1",
     name: "Oak Wood",
     icon: "wood1.png",
     description: "Relatively strong wood",
     type: "resource",
   }),
   smallEnergy: new Item({
-    id: "smallEnergy",
     name: "Small Energy",
     icon: "smallEnergy.png",
     description: "Small energy ball",
@@ -17,3 +15,7 @@ export const items = {
     energyValue: 5,
   }),
 } as const satisfies Record<ItemId, Item>;
+
+export const itemToIdMap = new Map<Item, ItemId>(
+  Object.entries(items).map(([id, item]) => [item, id])
+);

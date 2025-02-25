@@ -14,6 +14,13 @@ const getDecayAfterTimeMultiplier = (time: number) => {
   return Math.exp(DECAY_MULTIPLIER_PER_SECOND * time);
 };
 
+export type EnergyData = {
+  energy: number;
+  energyMax: number;
+  energyDecay: number;
+  temporaryDecay: number;
+};
+
 export class Energy {
   energy: Signal<number>;
   energyMax: Signal<number>;
@@ -60,5 +67,20 @@ export class Energy {
   }
   resetTemporaryDecay() {
     this.temporaryDecay.value = 0;
+  }
+
+  toData(): EnergyData {
+    return {
+      energy: this.energy.peek(),
+      energyMax: this.energyMax.peek(),
+      energyDecay: this.energyDecay.peek(),
+      temporaryDecay: this.temporaryDecay.peek(),
+    };
+  }
+  fromData(data: EnergyData) {
+    this.energy.value = data.energy;
+    this.energyMax.value = data.energyMax;
+    this.energyDecay.value = data.energyDecay;
+    this.temporaryDecay.value = data.temporaryDecay;
   }
 }

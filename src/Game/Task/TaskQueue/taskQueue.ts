@@ -5,8 +5,13 @@ import {
   type ReadonlySignal,
   type Signal,
 } from "@preact/signals-react";
+import { tasks, taskToIdMap, type TaskId } from "../../Data/tasks";
 import { type GameState } from "../../gameState";
 import type { Task } from "../task";
+
+export type TaskQueueSaveData = {
+  tasks: TaskId[];
+};
 
 export class TaskQueue {
   tasks: Signal<Task[]>;
@@ -36,7 +41,9 @@ export class TaskQueue {
     const currentTask = this.tasks.value[0];
     const taskSkill = gameState.skills[currentTask.skill];
     taskSkill.tick(deltaTime);
-    currentTask.progress.value += deltaTime * taskSkill.totalMultiplier.value;
+    currentTask.progress.value.increaseProgress(
+      deltaTime * taskSkill.totalMultiplier.value
+    );
   }
   reset() {
     this.tasks.value = [];
@@ -65,5 +72,13 @@ export class TaskQueue {
 
   clearTasks() {
     this.tasks.value = [];
+  }
+  toData(): TaskQueueSaveData {
+    return {
+      tasks: this.tasks.peek().map((task) => taskToIdMap.get(task)!),
+    };
+  }
+  fromData(data: TaskQueueSaveData) {
+    this.tasks.value = data.tasks.map((id) => tasks[id as TaskId]);
   }
 }

@@ -10,7 +10,18 @@ const INITIAL_EXPERIENCE_TO_NEXT_LEVEL = 10;
 const EXPERIENCE_TO_NEXT_LEVEL_MULTIPLIER = 1.15;
 const PRESTIGE_PER_LEVEL = 1.01;
 const NORMAL_PER_LEVEL = 1.1;
-
+export type SkillData = {
+  name: string;
+  level: number;
+  experience: number;
+  experienceToNextLevel: number;
+  prestigeLevel: number;
+  prestigeExperience: number;
+  prestigeExperienceToNextLevel: number;
+  multiplier: number;
+  prestigeMultiplier: number;
+  additionalMultiplier: number;
+};
 export class Skill {
   name: string;
   level: Signal<number>;
@@ -100,5 +111,33 @@ export class Skill {
     this.prestigeMultiplier.value = 1;
     this.experienceToNextLevel.value = INITIAL_EXPERIENCE_TO_NEXT_LEVEL;
     this.prestigeExperienceToNextLevel.value = INITIAL_EXPERIENCE_TO_NEXT_LEVEL;
+  }
+
+  toData(): SkillData {
+    return {
+      name: this.name,
+      level: this.level.peek(),
+      experience: this.experience.peek(),
+      experienceToNextLevel: this.experienceToNextLevel.peek(),
+      prestigeLevel: this.prestigeLevel.peek(),
+      prestigeExperience: this.prestigeExperience.peek(),
+      prestigeExperienceToNextLevel: this.prestigeExperienceToNextLevel.peek(),
+      multiplier: this.multiplier.peek(),
+      prestigeMultiplier: this.prestigeMultiplier.peek(),
+      additionalMultiplier: this.additionalMultiplier.peek(),
+    };
+  }
+  fromData(data: SkillData) {
+    this.name = data.name;
+    this.level.value = data.level;
+    this.experience.value = data.experience;
+    this.experienceToNextLevel.value = data.experienceToNextLevel;
+    this.prestigeLevel.value = data.prestigeLevel;
+    this.prestigeExperience.value = data.prestigeExperience;
+    this.prestigeExperienceToNextLevel.value =
+      data.prestigeExperienceToNextLevel;
+    this.multiplier.value = data.multiplier;
+    this.prestigeMultiplier.value = data.prestigeMultiplier;
+    this.additionalMultiplier.value = data.additionalMultiplier;
   }
 }
