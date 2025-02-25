@@ -29,7 +29,7 @@ const TaskItem = ({ task }: { task: Task }) => {
       <ProgressBar
         barClassName="h-2"
         backgroundClassName="bg-gray-800"
-        value={task.progress.value.progress}
+        value={task.progress.value.currentXp}
         maxValue={task.xpCost}
         fillClassName="bg-green-500"
       />

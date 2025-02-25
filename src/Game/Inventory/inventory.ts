@@ -55,6 +55,10 @@ export class Inventory {
       }
     });
   }
+  hasItem(item: Item, amount: number = 1): boolean {
+    const itemStack = this.items.peek().find((i) => i.item === item);
+    return itemStack ? itemStack.count.value >= amount : false;
+  }
   /**
    * Add an item to the inventory
    * @param item - The item to add

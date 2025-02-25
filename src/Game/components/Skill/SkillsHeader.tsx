@@ -1,6 +1,6 @@
 import Box from "../../../Components/Box";
 import { NumberDisplay } from "../../../Components/Number";
-import { gameState } from "../../gameState";
+import { gameData } from "../../gameState";
 import type { Skill } from "../../Skill/skill";
 import { SkillBar } from "./SkillBar";
 const SkillField = ({ skill }: { skill: Skill }) => {
@@ -33,7 +33,7 @@ const SkillField = ({ skill }: { skill: Skill }) => {
 export const SkillsHeader = () => {
   return (
     <div className="flex flex-row w-full bg-slate-800 items-stretch">
-      {Object.values(gameState.skills).map((skill) => {
+      {Object.values(gameData.skills).map((skill) => {
         return <SkillField key={skill.name} skill={skill} />;
       })}
     </div>

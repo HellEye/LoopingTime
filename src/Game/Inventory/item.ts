@@ -6,7 +6,6 @@ import {
 } from "@preact/signals-react";
 import { gameState, type GameState } from "../gameState";
 import { itemToIdMap } from "../Data/items";
-export type ItemId = string & { __type?: "itemId" };
 
 export type ItemData = {
   readonly name: string;

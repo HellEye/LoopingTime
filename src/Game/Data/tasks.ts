@@ -1,19 +1,24 @@
-import { type GameState } from "../gameState";
-import { Task, type TaskData } from "../Task/task";
-
-// type CustomTaskData<T> = Omit<TaskData, "enables" | "disables"> & {
-//   enables?: () => NoInfer<T>[];
-//   disables?: () => NoInfer<T>[];
-// };
+import { type GameData, type GameState } from "../gameState";
+import {
+  CraftingTask,
+  Task,
+  type AnyTaskData,
+  type CraftTaskData,
+  type TaskData,
+} from "../Task/task";
 
 function defineTasks<const Keys extends string>(
-  tasks: Record<Keys, TaskData<Keys>>
+  tasks: Record<Keys, AnyTaskData<Keys>>
 ): Record<Keys, Task<Keys>> {
   return Object.fromEntries(
-    Object.entries(tasks).map(
-      ([key, value]) =>
-        [key as Keys, new Task<Keys>(value as TaskData<Keys>)] as const
-    )
+    Object.entries(tasks).map(([key, v]) => {
+      const value = v as AnyTaskData<Keys>;
+      const task =
+        value.type === "craft"
+          ? new CraftingTask<Keys>(value as CraftTaskData<Keys>)
+          : new Task<Keys>(value as TaskData<Keys>);
+      return [key as Keys, task] as const;
+    })
   ) as { [K in Keys]: Task<Keys> };
 }
 
@@ -25,10 +30,8 @@ export const tasks = defineTasks({
     skill: "woodcutting",
     type: "gather",
     xpCost: 10,
-
-    onComplete: (state) => {
-      state.inventory.addItem(state.items.wood1);
-    },
+    enables: () => ["craftWoodenStick"],
+    gives: [{ item: "wood1", amount: 1 }],
   },
   gatherSmallEnergy: {
     name: "Gather Small Energy",
@@ -38,9 +41,7 @@ export const tasks = defineTasks({
 
     xpCost: 1,
     available: true,
-    onComplete: (state) => {
-      state.inventory.addItem(state.items.smallEnergy);
-    },
+    gives: [{ item: "smallEnergy", amount: 1 }],
   },
   craftWoodenStick: {
     name: "Craft Wooden Stick",
@@ -48,9 +49,9 @@ export const tasks = defineTasks({
     skill: "crafting",
     type: "craft",
     xpCost: 10,
-    onComplete: (_state) => {
-      // state.inventory.addItem("wooden-stick");
-    },
+    cost: [{ item: "wood1", amount: 5 }],
+    gives: [{ item: "smallEnergy", amount: 1 }],
+    isRepeatable: true,
   },
   /* beggining quote
   |Awakening protocoll initialized|
@@ -153,8 +154,8 @@ export const tasks = defineTasks({
     },
   },
 });
-export const initTasks = (gameState: GameState) => {
-  Object.values(tasks).forEach((task) => task.init(gameState));
+export const initTasks = (gameState: GameState, gameData: GameData) => {
+  Object.values(tasks).forEach((task) => task.init(gameState, gameData));
 };
 
 export const taskToIdMap = new Map<Task, TaskId>(

@@ -1,4 +1,4 @@
-import { gameState, saveGame } from "../gameState";
+import { gameData, gameState, saveGame } from "../gameState";
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const TARGET_FPS = 60;
@@ -8,7 +8,7 @@ const TARGET_FRAME_TIME = 1000 / TARGET_FPS;
  * Main logic loop of the game
  */
 const processTick = (deltaTime: number) => {
-  gameState.taskQueue.tick(deltaTime, gameState);
+  gameState.taskQueue.tick(deltaTime, gameState, gameData);
   gameState.inventory.tick(deltaTime, gameState);
   gameState.energy.tick(deltaTime);
 };

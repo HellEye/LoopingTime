@@ -1,4 +1,4 @@
-import { Item, type ItemId } from "../Inventory/item";
+import { Item } from "../Inventory/item";
 
 export const items = {
   wood1: new Item({
@@ -14,8 +14,10 @@ export const items = {
     type: "food",
     energyValue: 5,
   }),
-} as const satisfies Record<ItemId, Item>;
+} as const satisfies Record<string, Item>;
 
 export const itemToIdMap = new Map<Item, ItemId>(
-  Object.entries(items).map(([id, item]) => [item, id])
+  Object.entries(items).map(([id, item]) => [item, id as ItemId])
 );
+
+export type ItemId = keyof typeof items;

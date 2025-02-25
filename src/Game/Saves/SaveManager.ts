@@ -1,22 +1,29 @@
 import { tasks, type TaskId } from "../Data/tasks";
-import type { GameState } from "../gameState";
+import type { GameData, GameState } from "../gameState";
 import { loadEnergy, saveEnergy } from "./saveEnergy";
-import { loadInventory } from "./saveInventory";
+import { loadInventory, saveInventory } from "./saveInventory";
 import { loadSkills, saveAllSkills } from "./saveSkill";
 import { loadTaskQueue, saveTaskQueue } from "./saveTaskQueue";
 import { loadTasks, saveTasks } from "./saveTasks";
 
-export const saveGameToDb = async (gameState: GameState) => {
+export const saveGameToDb = async (
+  gameState: GameState,
+  gameData: GameData
+) => {
   console.time("saveGame");
   await Promise.all([
-    saveAllSkills(gameState.skills),
+    saveAllSkills(gameData.skills),
     saveEnergy(gameState.energy),
+    saveInventory(gameState.inventory),
     saveTasks(Object.values(tasks).filter((task) => task.available.peek())),
     saveTaskQueue(gameState.taskQueue.toData()),
   ]);
   console.timeEnd("saveGame");
 };
-export const loadGameFromDb = async (gameState: GameState) => {
+export const loadGameFromDb = async (
+  gameState: GameState,
+  gameData: GameData
+) => {
   console.time("loadGame");
   const [skills, energy, inventory, dbTasks, taskQueue] = await Promise.all([
     loadSkills(),
@@ -26,8 +33,8 @@ export const loadGameFromDb = async (gameState: GameState) => {
     loadTaskQueue(),
   ]);
   skills.forEach(([id, skill]) => {
-    if (gameState.skills[id as keyof typeof gameState.skills]) {
-      gameState.skills[id as keyof typeof gameState.skills].fromData(skill);
+    if (gameData.skills[id as keyof typeof gameData.skills]) {
+      gameData.skills[id as keyof typeof gameData.skills].fromData(skill);
     }
   });
   if (energy) {
@@ -39,7 +46,7 @@ export const loadGameFromDb = async (gameState: GameState) => {
   if (dbTasks) {
     Object.values(tasks).forEach((task) => (task.available.value = false));
     dbTasks.data.forEach((task) => {
-      tasks[task.id as TaskId].fromData(task.progress);
+      tasks[task.id as TaskId].fromData(task);
     });
   }
   if (taskQueue) {

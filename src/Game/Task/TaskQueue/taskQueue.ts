@@ -6,7 +6,7 @@ import {
   type Signal,
 } from "@preact/signals-react";
 import { tasks, taskToIdMap, type TaskId } from "../../Data/tasks";
-import { type GameState } from "../../gameState";
+import { gameCache, type GameData, type GameState } from "../../gameState";
 import type { Task } from "../task";
 
 export type TaskQueueSaveData = {
@@ -34,16 +34,26 @@ export class TaskQueue {
   addTaskInFront(task: Task) {
     this.tasks.value = [task, ...this.tasks.peek()];
   }
-  tick(deltaTime: number, gameState: GameState) {
+  tick(deltaTime: number, gameState: GameState, gameData: GameData) {
     if (this.tasks.peek().length === 0) {
       return;
     }
     const currentTask = this.tasks.value[0];
-    const taskSkill = gameState.skills[currentTask.skill];
+    const taskSkill = gameData.skills[currentTask.skill];
+    const tickResult = currentTask.tick(deltaTime, gameState, gameData);
+    if (tickResult) {
+      if (tickResult.type === "notEnoughResources") {
+        const gatherTask = gameCache.gatherItemTaskMap
+          .get(tickResult.itemId)
+          ?.find((task) => task.available.peek());
+        if (gatherTask) {
+          this.addTaskInFront(gatherTask);
+        } else {
+          this.removeTask(0);
+        }
+      }
+    }
     taskSkill.tick(deltaTime);
-    currentTask.progress.value.increaseProgress(
-      deltaTime * taskSkill.totalMultiplier.value
-    );
   }
   reset() {
     this.tasks.value = [];
